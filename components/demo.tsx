@@ -163,10 +163,11 @@ export function Demo() {
           <div className="message-list">
             {messages.length === 0 ? (
               <div className="empty-state">
-                <h1>What can I help you build?</h1>
+                <h1>What will you build?</h1>
                 <p>
-                  OpenAI runs the agent. Vercel hosts the experience, coordinates
-                  background work, and provides isolated compute for files and commands.
+                  Welcome to the OpenAI Agents API Vercel Starter app. OpenAI hosts
+                  the agent loop, Vercel hosts the app, coordinates background work,
+                  and provides isolated compute for files and commands.
                 </p>
               </div>
             ) : (
