@@ -1,7 +1,12 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import { eventType, parseSseBlock, type ParsedEvent } from "@/lib/sse";
+import {
+  eventType,
+  isTextDeltaEvent,
+  parseSseBlock,
+  type ParsedEvent,
+} from "@/lib/sse";
 
 type Session = { id: string; status?: string };
 
@@ -78,7 +83,9 @@ export function Demo() {
         for (const block of blocks) {
           const parsed = parseSseBlock(block);
           if (!parsed) continue;
-          setEvents((current) => [...current, parsed].slice(-30));
+          if (!isTextDeltaEvent(parsed)) {
+            setEvents((current) => [...current, parsed].slice(-30));
+          }
           const text = eventText(parsed);
           if (text) setOutput((current) => current + text);
         }

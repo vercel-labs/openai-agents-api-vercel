@@ -29,6 +29,10 @@ export function eventType(event: ParsedEvent) {
   return typeof event.data.type === "string" ? event.data.type : event.event;
 }
 
+export function isTextDeltaEvent(event: ParsedEvent) {
+  return eventType(event) === "session.turn.output_text.delta";
+}
+
 export function eventTurnId(event: ParsedEvent) {
   const direct = event.data.turn_id;
   if (typeof direct === "string") return direct;
