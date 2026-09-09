@@ -14,20 +14,13 @@ export default async function Home() {
           <span className="plus" aria-hidden="true">×</span>
           <span>Vercel Sandbox</span>
         </div>
-        <a href="https://github.com/vercel-labs/openai-agents-api-vercel">
-          GitHub ↗
-        </a>
-        <form className="logout-form" action="/api/auth/logout" method="post">
-          <button type="submit">Sign out</button>
-        </form>
+        <nav aria-label="Project links">
+          <a href="https://github.com/vercel-labs/openai-agents-api-vercel">GitHub ↗</a>
+          <form className="logout-form" action="/api/auth/logout" method="post">
+            <button type="submit">Sign out</button>
+          </form>
+        </nav>
       </header>
-      <section className="hero">
-        <h1>Run a coding agent in an isolated Sandbox.</h1>
-        <p className="lede">
-          OpenAI manages the agent loop and session state. Vercel gives each
-          session a persistent workspace for files, commands, and tests.
-        </p>
-      </section>
       <Demo />
     </main>
   );

@@ -1,6 +1,13 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import {
+  type FormEvent,
+  type KeyboardEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   eventType,
   outputTextDelta,
@@ -9,6 +16,7 @@ import {
 } from "@/lib/sse";
 
 type Session = { id: string; status?: string };
+type Message = { id: string; role: "user" | "assistant"; content: string };
 
 async function errorMessage(response: Response) {
   const body = (await response.json().catch(() => null)) as { error?: string } | null;
@@ -16,26 +24,35 @@ async function errorMessage(response: Response) {
 }
 
 export function Demo() {
-  const [prompt, setPrompt] = useState(
-    "Create a small Node.js program that prints the first 10 Fibonacci numbers, run it, and explain the result.",
-  );
+  const [prompt, setPrompt] = useState("");
   const [session, setSession] = useState<Session | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [events, setEvents] = useState<ParsedEvent[]>([]);
-  const [output, setOutput] = useState("");
   const [error, setError] = useState("");
   const [running, setRunning] = useState(false);
+  const conversationRef = useRef<HTMLDivElement>(null);
+  const eventListRef = useRef<HTMLOListElement>(null);
 
   const status = useMemo(() => {
     if (error) return "error";
     if (running) return "running";
-    if (session) return "ready";
+    if (session) return "connected";
     return "not started";
   }, [error, running, session]);
 
-  async function create() {
-    const response = await fetch("/api/sessions", {
-      method: "POST",
+  useEffect(() => {
+    conversationRef.current?.scrollTo({
+      top: conversationRef.current.scrollHeight,
+      behavior: running ? "smooth" : "auto",
     });
+  }, [messages, running]);
+
+  useEffect(() => {
+    eventListRef.current?.scrollTo({ top: eventListRef.current.scrollHeight });
+  }, [events]);
+
+  async function create() {
+    const response = await fetch("/api/sessions", { method: "POST" });
     if (!response.ok) throw new Error(await errorMessage(response));
     const created = (await response.json()) as Session;
     setSession(created);
@@ -44,41 +61,69 @@ export function Demo() {
 
   async function run(event: FormEvent) {
     event.preventDefault();
-    if (!prompt.trim()) return;
+    const input = prompt.trim();
+    if (!input || running) return;
+
+    const assistantId = crypto.randomUUID();
+    setMessages((current) => [
+      ...current,
+      { id: crypto.randomUUID(), role: "user", content: input },
+      { id: assistantId, role: "assistant", content: "" },
+    ]);
+    setPrompt("");
     setRunning(true);
     setError("");
-    setEvents([]);
-    setOutput("");
 
     try {
       const active = session ?? (await create());
       const response = await fetch(`/api/sessions/${active.id}/input`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ input: prompt }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ input }),
       });
       if (!response.ok || !response.body) throw new Error(await errorMessage(response));
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      let receivedText = false;
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
         const blocks = buffer.split(/\r?\n\r?\n/);
         buffer = blocks.pop() ?? "";
+
         for (const block of blocks) {
           const parsed = parseSseBlock(block);
           if (!parsed) continue;
-          setEvents((current) => [...current, parsed].slice(-30));
+          setEvents((current) => [...current, parsed].slice(-50));
+
           const text = outputTextDelta(parsed);
-          if (text) setOutput((current) => current + text);
+          if (!text) continue;
+          receivedText = true;
+          setMessages((current) =>
+            current.map((message) =>
+              message.id === assistantId
+                ? { ...message, content: message.content + text }
+                : message,
+            ),
+          );
         }
       }
+
+      if (!receivedText) {
+        setMessages((current) =>
+          current.map((message) =>
+            message.id === assistantId
+              ? { ...message, content: "The agent completed without a text response." }
+              : message,
+          ),
+        );
+      }
     } catch (reason) {
+      setMessages((current) => current.filter((message) => message.id !== assistantId));
       setError(reason instanceof Error ? reason.message : "Something went wrong");
     } finally {
       setRunning(false);
@@ -86,76 +131,121 @@ export function Demo() {
   }
 
   async function cleanup() {
-    if (!session) return;
-    await fetch(`/api/sessions/${session.id}`, {
-      method: "DELETE",
-    });
-    setSession(null);
-    setEvents([]);
-    setOutput("");
+    if (!session || running) return;
+    setError("");
+
+    try {
+      const response = await fetch(`/api/sessions/${session.id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error(await errorMessage(response));
+      setSession(null);
+      setEvents([]);
+      setMessages([]);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not delete the session");
+    }
+  }
+
+  function handleComposerKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
+    event.preventDefault();
+    event.currentTarget.form?.requestSubmit();
   }
 
   return (
-    <section className="demo">
-      <div className="demo-header">
-        <div>
-          <h2>Give the agent a task</h2>
-          <p>
-            The same workspace remains available for follow-up instructions.
-          </p>
-        </div>
-        <div className="session-state">
-          <span
-            className={`status ${status}`}
-            role="status"
-            aria-live="polite"
-          >
-            {status}
-          </span>
-          {session && <code>{session.id}</code>}
-        </div>
-      </div>
-      <form onSubmit={run}>
-        <label htmlFor="task">
-          Task
-          <textarea
-            id="task"
-            value={prompt}
-            onChange={(event) => setPrompt(event.target.value)}
-          />
-        </label>
-        <div className="actions">
-          <button type="submit" disabled={running || !prompt.trim()}>
-            {running ? "Agent running…" : session ? "Send follow-up" : "Start session"}
-          </button>
-          {session && (
-            <button type="button" className="secondary" onClick={cleanup} disabled={running}>
-              Delete session
-            </button>
-          )}
-        </div>
-      </form>
-      {error ? (
-        <p className="error" role="alert">
-          {error}
-        </p>
-      ) : null}
-      <div className="results">
-        <div>
-          <h3>Agent output</h3>
-          <pre>{output || "Output will stream here."}</pre>
-        </div>
-        <div>
-          <h3>Session events</h3>
-          <ol>
-            {events.length === 0 ? (
-              <li className="muted">Waiting for a run.</li>
+    <div className="workspace">
+      <section className="chat-pane" aria-label="Agent conversation">
+        <div className="conversation" ref={conversationRef} role="log" aria-live="polite">
+          <div className="message-list">
+            {messages.length === 0 ? (
+              <div className="empty-state">
+                <span className="empty-mark" aria-hidden="true">⌁</span>
+                <h1>What should the agent build?</h1>
+                <p>
+                  Give it a coding task. OpenAI runs the agent while Vercel Sandbox
+                  provides its files and command environment.
+                </p>
+              </div>
             ) : (
-              events.map((event, index) => <li key={`${event.id ?? index}`}>{eventType(event)}</li>)
+              messages.map((message) => (
+                <article className={`message ${message.role}`} key={message.id}>
+                  <div className="message-content">
+                    {message.content || (
+                      <span className="thinking" aria-label="Agent is working">
+                        <i /> <i /> <i />
+                      </span>
+                    )}
+                  </div>
+                </article>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="composer-wrap">
+          {error ? <p className="composer-error" role="alert">{error}</p> : null}
+          <form className="composer" onSubmit={run}>
+            <label className="sr-only" htmlFor="task">Message the coding agent</label>
+            <textarea
+              autoFocus
+              id="task"
+              onChange={(event) => setPrompt(event.target.value)}
+              onKeyDown={handleComposerKeyDown}
+              placeholder="Ask the coding agent anything…"
+              rows={2}
+              value={prompt}
+            />
+            <div className="composer-footer">
+              <span>{session ? "Same session and workspace" : "Starts a new session"}</span>
+              <button
+                className={running ? "send-button loading" : "send-button"}
+                type="submit"
+                disabled={running || !prompt.trim()}
+                aria-label={running ? "Agent is running" : "Send message"}
+              >
+                {running ? <span className="spinner" /> : <span aria-hidden="true">↑</span>}
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <aside className="session-rail" aria-label="Session details">
+        <div className="rail-header">
+          <div>
+            <span className={`status ${status}`} role="status">{status}</span>
+            <h2>Session</h2>
+          </div>
+          {session ? (
+            <button
+              className="delete-button"
+              type="button"
+              onClick={cleanup}
+              disabled={running}
+            >
+              Delete
+            </button>
+          ) : null}
+        </div>
+
+        {session ? <code className="session-id">{session.id}</code> : (
+          <p className="rail-copy">A session will appear after your first message.</p>
+        )}
+
+        <div className="event-section">
+          <h3>Events</h3>
+          <ol className="event-list" ref={eventListRef}>
+            {events.length === 0 ? (
+              <li className="muted">Waiting for session activity.</li>
+            ) : (
+              events.map((item, index) => (
+                <li key={`${item.id ?? index}`}>{eventType(item)}</li>
+              ))
             )}
           </ol>
         </div>
-      </div>
-    </section>
+      </aside>
+    </div>
   );
 }
