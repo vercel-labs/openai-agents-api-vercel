@@ -12,7 +12,7 @@ export default async function LoginPage() {
           <span className="brand" aria-hidden="true">▲</span>
           <span>OpenAI Agents API</span>
           <span className="plus" aria-hidden="true">×</span>
-          <span>Vercel Sandbox</span>
+          <span>Vercel</span>
         </div>
         <h1>Sign in</h1>
         <p className="login-copy">

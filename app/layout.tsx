@@ -6,9 +6,9 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "OpenAI Agents API + Vercel Sandbox",
+  title: "OpenAI Agents API on Vercel",
   description:
-    "Run an OpenAI-hosted Codex agent in an isolated Vercel Sandbox.",
+    "Deploy an OpenAI Agents API integration with Vercel Functions, Queues, and Sandbox.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

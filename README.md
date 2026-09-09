@@ -1,14 +1,14 @@
-# OpenAI Agents API with Vercel Sandbox
+# OpenAI Agents API on Vercel
 
-Run an OpenAI-hosted Codex agent with a persistent, isolated [Vercel Sandbox](https://vercel.com/docs/sandbox) as its execution environment.
+Build and deploy an OpenAI Agents API integration on Vercel. Vercel hosts the web experience and API routes, [Vercel Queues](https://vercel.com/docs/queues) coordinates lifecycle work, and [Vercel Sandbox](https://vercel.com/docs/sandbox) gives each agent session a persistent, isolated execution environment.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel-labs%2Fopenai-agents-api-vercel&env=OPENAI_API_KEY%2COPENAI_AGENT_ID%2COPENAI_EXECUTOR_API_KEY%2CAPP_PASSWORD&envDescription=Credentials%20and%20an%20application%20password%20for%20the%20OpenAI%20Agents%20API%20demo.%20Add%20the%20webhook%20secret%20after%20the%20first%20deployment.&project-name=openai-agents-api-vercel&repository-name=openai-agents-api-vercel)
 
 ## How it works
 
-OpenAI hosts the agent harness, inference loop, and session state. This application supplies the execution environment where the agent reads and writes files and runs commands.
+OpenAI hosts the agent harness, inference loop, and session state. Vercel hosts the user-facing interface and control plane, then supplies the execution environment where the agent reads and writes files and runs commands.
 
-There are two separate paths. The **agent path** carries user input and streamed output between the application and OpenAI. The **infrastructure path** handles OpenAI's request to connect a Sandbox.
+There are two separate paths. The **agent path** carries user input and streamed output between the Vercel application and OpenAI. The **infrastructure path** handles OpenAI's request to connect isolated compute.
 
 During a run:
 
@@ -21,12 +21,12 @@ During a run:
 
 Queue delivery is at least once. Re-reading current session state, `Sandbox.getOrCreate()`, a deterministic Sandbox name, and `flock` guards make retries safe. OpenAI remains the source of truth for session lifecycle, so a durable Workflow would duplicate state without improving this reconciliation path.
 
-This is different from [building an agent with the OpenAI Agents SDK and Vercel Sandbox](https://vercel.com/kb/guide/building-an-agent-with-openai-agents-sdk-and-vercel-sandbox). In that architecture, your application runs the agent loop. Here, OpenAI runs the Codex harness and your application only manages the Sandbox connection.
+This is different from [building an agent with the OpenAI Agents SDK and Vercel Sandbox](https://vercel.com/kb/guide/building-an-agent-with-openai-agents-sdk-and-vercel-sandbox). In that architecture, your application runs the agent loop. Here, OpenAI runs the Codex harness while the Vercel application handles the interface, session APIs, and execution-environment lifecycle.
 
 ## Prerequisites
 
 - Access to the OpenAI Agents API and a configured agent ID
-- A Vercel project with Sandbox and Queues available
+- A Vercel project with Functions, Queues, and Sandbox available
 - Two OpenAI API keys from the same organization, project, and user or service account:
   - `OPENAI_API_KEY` for the application control plane
   - `OPENAI_EXECUTOR_API_KEY` restricted to **List models → Read**, with every other permission set to **None**

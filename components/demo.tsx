@@ -163,10 +163,10 @@ export function Demo() {
           <div className="message-list">
             {messages.length === 0 ? (
               <div className="empty-state">
-                <h1>What should the agent build?</h1>
+                <h1>What can I help you build?</h1>
                 <p>
-                  Give it a coding task. OpenAI runs the agent while Vercel Sandbox
-                  provides its files and command environment.
+                  OpenAI runs the agent. Vercel hosts the experience, coordinates
+                  background work, and provides isolated compute for files and commands.
                 </p>
               </div>
             ) : (
@@ -196,13 +196,13 @@ export function Demo() {
         <div className="composer-wrap">
           {error ? <p className="composer-error" role="alert">{error}</p> : null}
           <form className="composer" onSubmit={run}>
-            <label className="sr-only" htmlFor="task">Message the coding agent</label>
+            <label className="sr-only" htmlFor="task">Message the agent</label>
             <textarea
               autoFocus
               id="task"
               onChange={(event) => setPrompt(event.target.value)}
               onKeyDown={handleComposerKeyDown}
-              placeholder="Ask the coding agent anything…"
+              placeholder="Ask anything…"
               rows={2}
               value={prompt}
             />
