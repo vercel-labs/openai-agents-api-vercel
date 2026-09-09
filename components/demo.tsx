@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-import ReactMarkdown from "react-markdown";
+import { Streamdown } from "streamdown";
 import {
   eventType,
   outputTextDelta,
@@ -170,11 +170,17 @@ export function Demo() {
                 </p>
               </div>
             ) : (
-              messages.map((message) => (
+              messages.map((message, index) => (
                 <article className={`message ${message.role}`} key={message.id}>
                   <div className="message-content">
                     {message.content && message.role === "assistant" ? (
-                      <ReactMarkdown>{message.content}</ReactMarkdown>
+                      <Streamdown
+                        controls={false}
+                        mode={running && index === messages.length - 1 ? "streaming" : "static"}
+                        parseIncompleteMarkdown
+                      >
+                        {message.content}
+                      </Streamdown>
                     ) : message.content || (
                       <span className="thinking" aria-label="Agent is working">
                         <i /> <i /> <i />
