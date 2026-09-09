@@ -71,6 +71,7 @@ button, a, textarea, input { -webkit-tap-highlight-color: transparent; }
 }
 .site-identity { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .brand { font-size: 14px; line-height: 1; }
+.vercel-logo { width: 16px; height: 14px; flex: 0 0 auto; }
 .plus { color: var(--faint); margin: 0 2px; }
 .site-header nav { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 .site-header a,
