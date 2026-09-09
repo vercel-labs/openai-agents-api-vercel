@@ -146,12 +146,12 @@ button, a, textarea, input { -webkit-tap-highlight-color: transparent; }
 }
 .composer {
   overflow: hidden;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border);
   border-radius: 14px;
   background: var(--surface-raised);
   box-shadow: 0 8px 28px rgb(0 0 0 / 8%);
 }
-.composer:focus-within { border-color: var(--muted); }
+.composer:focus-within { border-color: var(--border-strong); }
 .composer textarea {
   display: block;
   width: 100%;
