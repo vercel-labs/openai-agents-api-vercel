@@ -78,6 +78,7 @@ button, a, textarea, input { -webkit-tap-highlight-color: transparent; }
   border: 0;
   border-radius: 6px;
   padding: 7px 8px;
+  cursor: pointer;
 }
 .site-header a:hover,
 .logout-form button:hover { color: var(--foreground); background: var(--surface-raised); }
