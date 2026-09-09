@@ -262,7 +262,6 @@ button, a, textarea, input { -webkit-tap-highlight-color: transparent; }
 .login-card { width: min(420px, 100%); }
 .login-card .vercel-logo { display: block; margin-bottom: 48px; }
 .login-card h1 { margin: 0; font-size: 48px; letter-spacing: -0.045em; }
-.login-copy { color: var(--muted); line-height: 1.5; margin: 18px 0 0; }
 .login-form { display: grid; gap: 16px; padding: 28px 0 0; border: 0; }
 .login-form label { display: grid; gap: 9px; color: var(--muted); font-size: 13px; }
 .login-form input {

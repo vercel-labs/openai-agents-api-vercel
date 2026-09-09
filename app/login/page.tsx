@@ -17,9 +17,6 @@ export default async function LoginPage() {
           <path d="M8 0 16 14H0L8 0Z" fill="currentColor" />
         </svg>
         <h1>Sign in</h1>
-        <p className="login-copy">
-          Enter the password configured for this deployment.
-        </p>
         <LoginForm />
       </section>
     </main>
