@@ -8,8 +8,12 @@ export default async function LoginPage() {
   return (
     <main className="login-shell">
       <section className="login-card">
-        <span className="brand">▲</span>
-        <p className="eyebrow">OpenAI Agents API × Vercel Sandbox</p>
+        <div className="site-identity">
+          <span className="brand" aria-hidden="true">▲</span>
+          <span>OpenAI Agents API</span>
+          <span className="plus" aria-hidden="true">×</span>
+          <span>Vercel Sandbox</span>
+        </div>
         <h1>Sign in</h1>
         <p className="login-copy">
           Enter the password configured for this deployment.

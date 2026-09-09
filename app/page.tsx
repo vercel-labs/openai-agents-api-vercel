@@ -6,25 +6,26 @@ export default async function Home() {
   if (!(await isAuthenticated())) redirect("/login");
 
   return (
-    <main>
-      <nav>
-        <span className="brand">▲</span>
-        <span>OpenAI Agents API</span>
-        <span className="plus">×</span>
-        <span>Vercel Sandbox</span>
+    <main className="page-shell">
+      <header className="site-header">
+        <div className="site-identity">
+          <span className="brand" aria-hidden="true">▲</span>
+          <span>OpenAI Agents API</span>
+          <span className="plus" aria-hidden="true">×</span>
+          <span>Vercel Sandbox</span>
+        </div>
         <a href="https://github.com/vercel-labs/openai-agents-api-vercel">
           GitHub ↗
         </a>
         <form className="logout-form" action="/api/auth/logout" method="post">
           <button type="submit">Sign out</button>
         </form>
-      </nav>
+      </header>
       <section className="hero">
-        <p className="eyebrow">Managed agent, isolated execution</p>
-        <h1>Give a Codex agent<br />its own Sandbox.</h1>
+        <h1>Run a coding agent in an isolated Sandbox.</h1>
         <p className="lede">
-          OpenAI hosts the agent harness and session state. Vercel gives each
-          session a persistent, isolated environment for files and commands.
+          OpenAI manages the agent loop and session state. Vercel gives each
+          session a persistent workspace for files, commands, and tests.
         </p>
       </section>
       <Demo />

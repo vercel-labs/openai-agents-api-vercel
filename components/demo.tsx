@@ -104,18 +104,33 @@ export function Demo() {
     <section className="demo">
       <div className="demo-header">
         <div>
-          <span className={`status ${status}`}>{status}</span>
-          <h2>Try the managed Sandbox flow</h2>
+          <h2>Give the agent a task</h2>
+          <p>
+            The same workspace remains available for follow-up instructions.
+          </p>
         </div>
-        {session && <code>{session.id}</code>}
+        <div className="session-state">
+          <span
+            className={`status ${status}`}
+            role="status"
+            aria-live="polite"
+          >
+            {status}
+          </span>
+          {session && <code>{session.id}</code>}
+        </div>
       </div>
       <form onSubmit={run}>
-        <label>
+        <label htmlFor="task">
           Task
-          <textarea value={prompt} onChange={(event) => setPrompt(event.target.value)} />
+          <textarea
+            id="task"
+            value={prompt}
+            onChange={(event) => setPrompt(event.target.value)}
+          />
         </label>
         <div className="actions">
-          <button disabled={running || !prompt.trim()}>
+          <button type="submit" disabled={running || !prompt.trim()}>
             {running ? "Agent running…" : session ? "Send follow-up" : "Start session"}
           </button>
           {session && (
@@ -125,7 +140,11 @@ export function Demo() {
           )}
         </div>
       </form>
-      {error && <p className="error">{error}</p>}
+      {error ? (
+        <p className="error" role="alert">
+          {error}
+        </p>
+      ) : null}
       <div className="results">
         <div>
           <h3>Agent output</h3>
