@@ -3,6 +3,7 @@ import {
   eventTurnId,
   eventType,
   outputTextDelta,
+  outputTextPartKey,
   parseSseBlock,
 } from "@/lib/sse";
 
@@ -31,5 +32,17 @@ describe("SSE parsing", () => {
 
     expect(outputTextDelta(delta!)).toBe("hello");
     expect(outputTextDelta(done!)).toBeUndefined();
+  });
+
+  it("identifies the output text part that owns a delta", () => {
+    const first = parseSseBlock(
+      'data: {"type":"session.turn.output_text.delta","item_id":"msg_1","output_index":0,"content_index":0,"delta":"First."}',
+    );
+    const second = parseSseBlock(
+      'data: {"type":"session.turn.output_text.delta","item_id":"msg_2","output_index":2,"content_index":0,"delta":"Second."}',
+    );
+
+    expect(outputTextPartKey(first!)).toBe("msg_1:0:0");
+    expect(outputTextPartKey(second!)).toBe("msg_2:2:0");
   });
 });

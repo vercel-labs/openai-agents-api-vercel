@@ -7,9 +7,11 @@ import {
   useRef,
   useState,
 } from "react";
+import ReactMarkdown from "react-markdown";
 import {
   eventType,
   outputTextDelta,
+  outputTextPartKey,
   parseSseBlock,
   type ParsedEvent,
 } from "@/lib/sse";
@@ -79,6 +81,7 @@ export function Demo() {
       const decoder = new TextDecoder();
       let buffer = "";
       let receivedText = false;
+      let currentTextPart: string | undefined;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -95,10 +98,18 @@ export function Demo() {
           const text = outputTextDelta(parsed);
           if (!text) continue;
           receivedText = true;
+          const nextTextPart = outputTextPartKey(parsed);
+          const startsNewPart = Boolean(
+            currentTextPart && nextTextPart && currentTextPart !== nextTextPart,
+          );
+          if (nextTextPart) currentTextPart = nextTextPart;
           setMessages((current) =>
             current.map((message) =>
               message.id === assistantId
-                ? { ...message, content: message.content + text }
+                ? {
+                    ...message,
+                    content: message.content + paragraphBreak(message.content, startsNewPart) + text,
+                  }
                 : message,
             ),
           );
@@ -162,7 +173,9 @@ export function Demo() {
               messages.map((message) => (
                 <article className={`message ${message.role}`} key={message.id}>
                   <div className="message-content">
-                    {message.content || (
+                    {message.content && message.role === "assistant" ? (
+                      <ReactMarkdown>{message.content}</ReactMarkdown>
+                    ) : message.content || (
                       <span className="thinking" aria-label="Agent is working">
                         <i /> <i /> <i />
                       </span>
@@ -236,4 +249,9 @@ export function Demo() {
       </aside>
     </div>
   );
+}
+
+function paragraphBreak(content: string, startsNewPart: boolean) {
+  if (!content || !startsNewPart || content.endsWith("\n\n")) return "";
+  return content.endsWith("\n") ? "\n" : "\n\n";
 }

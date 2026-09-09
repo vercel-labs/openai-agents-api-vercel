@@ -111,6 +111,25 @@ button, a, textarea, input { -webkit-tap-highlight-color: transparent; }
   line-height: 1.5;
 }
 .message.assistant .message-content { width: 100%; }
+.message.assistant .message-content > :first-child { margin-top: 0; }
+.message.assistant .message-content > :last-child { margin-bottom: 0; }
+.message.assistant .message-content p { margin: 0 0 14px; }
+.message.assistant .message-content code {
+  padding: 2px 5px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface-raised);
+  font: 0.9em var(--font-mono);
+}
+.message.assistant .message-content pre {
+  overflow-x: auto;
+  margin: 14px 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-raised);
+}
+.message.assistant .message-content pre code { padding: 0; border: 0; background: transparent; }
 .thinking { display: inline-flex; gap: 4px; align-items: center; height: 24px; }
 .thinking i {
   width: 4px;

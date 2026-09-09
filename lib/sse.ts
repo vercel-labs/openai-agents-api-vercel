@@ -42,6 +42,21 @@ export function outputTextDelta(event: ParsedEvent) {
   return undefined;
 }
 
+export function outputTextPartKey(event: ParsedEvent) {
+  if (eventType(event) !== "session.turn.output_text.delta") return undefined;
+
+  const nested = event.data.data;
+  const data = nested && typeof nested === "object"
+    ? nested as Record<string, unknown>
+    : event.data;
+  const itemId = typeof data.item_id === "string" ? data.item_id : "";
+  const outputIndex = typeof data.output_index === "number" ? data.output_index : "";
+  const contentIndex = typeof data.content_index === "number" ? data.content_index : "";
+
+  if (!itemId && outputIndex === "" && contentIndex === "") return undefined;
+  return `${itemId}:${outputIndex}:${contentIndex}`;
+}
+
 export function eventTurnId(event: ParsedEvent) {
   const direct = event.data.turn_id;
   if (typeof direct === "string") return direct;
