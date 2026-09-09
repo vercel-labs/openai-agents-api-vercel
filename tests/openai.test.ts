@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createSession } from "@/lib/openai";
+import { createSession, sendInput } from "@/lib/openai";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -35,6 +35,25 @@ describe("OpenAI Agents API client", () => {
             type: "self_hosted",
             workspace_directory: "/workspace",
           },
+        }),
+      }),
+    );
+  });
+
+  it("accepts a successful input response with an empty body", async () => {
+    vi.stubEnv("OPENAI_API_KEY", "test-app-key");
+    const fetch = vi.fn().mockResolvedValue(new Response(null, { status: 202 }));
+    vi.stubGlobal("fetch", fetch);
+
+    await expect(
+      sendInput("session_test", "Run the tests", "input_test"),
+    ).resolves.toEqual({});
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.openai.com/v1/agents/sessions/session_test/events",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          "Idempotency-Key": "input_test",
         }),
       }),
     );

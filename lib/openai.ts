@@ -28,8 +28,9 @@ async function decode<T>(response: Response): Promise<T> {
     const detail = await response.text();
     throw new Error(`OpenAI Agents API returned ${response.status}: ${detail}`);
   }
-  if (response.status === 204) return {} as T;
-  return (await response.json()) as T;
+  const body = await response.text();
+  if (!body.trim()) return {} as T;
+  return JSON.parse(body) as T;
 }
 
 export async function createSession() {
