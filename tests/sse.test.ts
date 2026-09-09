@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   eventTurnId,
   eventType,
-  isTextDeltaEvent,
+  outputTextDelta,
   parseSseBlock,
 } from "@/lib/sse";
 
@@ -21,15 +21,15 @@ describe("SSE parsing", () => {
     expect(eventType(event!)).toBe("session.idle");
   });
 
-  it("identifies output text deltas that should not fill the event panel", () => {
+  it("extracts deltas without appending the completed text again", () => {
     const delta = parseSseBlock(
       'data: {"type":"session.turn.output_text.delta","delta":"hello"}',
     );
-    const completed = parseSseBlock(
-      'data: {"type":"session.turn.completed","turn_id":"turn_1"}',
+    const done = parseSseBlock(
+      'data: {"type":"session.turn.output_text.done","text":"hello"}',
     );
 
-    expect(isTextDeltaEvent(delta!)).toBe(true);
-    expect(isTextDeltaEvent(completed!)).toBe(false);
+    expect(outputTextDelta(delta!)).toBe("hello");
+    expect(outputTextDelta(done!)).toBeUndefined();
   });
 });

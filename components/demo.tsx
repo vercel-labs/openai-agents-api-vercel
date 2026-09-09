@@ -3,22 +3,12 @@
 import { FormEvent, useMemo, useState } from "react";
 import {
   eventType,
-  isTextDeltaEvent,
+  outputTextDelta,
   parseSseBlock,
   type ParsedEvent,
 } from "@/lib/sse";
 
 type Session = { id: string; status?: string };
-
-function eventText(event: ParsedEvent) {
-  const candidates = [event.data.delta, event.data.output_text, event.data.text];
-  const nested = event.data.data;
-  if (nested && typeof nested === "object") {
-    const value = nested as Record<string, unknown>;
-    candidates.push(value.delta, value.output_text, value.text);
-  }
-  return candidates.find((value): value is string => typeof value === "string");
-}
 
 async function errorMessage(response: Response) {
   const body = (await response.json().catch(() => null)) as { error?: string } | null;
@@ -83,10 +73,8 @@ export function Demo() {
         for (const block of blocks) {
           const parsed = parseSseBlock(block);
           if (!parsed) continue;
-          if (!isTextDeltaEvent(parsed)) {
-            setEvents((current) => [...current, parsed].slice(-30));
-          }
-          const text = eventText(parsed);
+          setEvents((current) => [...current, parsed].slice(-30));
+          const text = outputTextDelta(parsed);
           if (text) setOutput((current) => current + text);
         }
       }

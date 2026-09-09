@@ -29,8 +29,17 @@ export function eventType(event: ParsedEvent) {
   return typeof event.data.type === "string" ? event.data.type : event.event;
 }
 
-export function isTextDeltaEvent(event: ParsedEvent) {
-  return eventType(event) === "session.turn.output_text.delta";
+export function outputTextDelta(event: ParsedEvent) {
+  if (eventType(event) !== "session.turn.output_text.delta") return undefined;
+  if (typeof event.data.delta === "string") return event.data.delta;
+
+  const data = event.data.data;
+  if (data && typeof data === "object" && "delta" in data) {
+    const delta = (data as Record<string, unknown>).delta;
+    return typeof delta === "string" ? delta : undefined;
+  }
+
+  return undefined;
 }
 
 export function eventTurnId(event: ParsedEvent) {
