@@ -100,18 +100,6 @@ button, a, textarea, input { -webkit-tap-highlight-color: transparent; }
   gap: 22px;
 }
 .empty-state { margin: auto; max-width: 480px; padding: 40px 0 96px; text-align: center; }
-.empty-mark {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  margin: 0 auto 20px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  color: var(--muted);
-  background: var(--surface-raised);
-  font-size: 20px;
-}
 .empty-state h1 { margin: 0; font-size: 24px; letter-spacing: -0.035em; }
 .empty-state p { margin: 12px auto 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
 .message { display: flex; width: 100%; }

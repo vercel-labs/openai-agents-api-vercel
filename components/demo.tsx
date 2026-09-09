@@ -160,7 +160,6 @@ export function Demo() {
           <div className="message-list">
             {messages.length === 0 ? (
               <div className="empty-state">
-                <span className="empty-mark" aria-hidden="true">⌁</span>
                 <h1>What should the agent build?</h1>
                 <p>
                   Give it a coding task. OpenAI runs the agent while Vercel Sandbox
