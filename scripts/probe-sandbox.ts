@@ -19,12 +19,23 @@ const sandbox = await Sandbox.create({
 });
 
 try {
-  const install = await sandbox.runCommand({
-    cmd: "npm",
-    args: ["install", "-g", "@openai/codex@alpha"],
+  const setup = await sandbox.runCommand({
+    cmd: "flock",
+    args: [
+      "-w",
+      "120",
+      "/tmp/codex-setup.lock",
+      "sh",
+      "-c",
+      "mkdir -p /workspace && chown ubuntu:ubuntu /workspace && (command -v codex || npm install -g @openai/codex@alpha)",
+    ],
     sudo: true,
   });
-  if (install.exitCode !== 0) throw new Error("Codex installation failed");
+  if (setup.exitCode !== 0) {
+    throw new Error(
+      `Codex setup failed (${setup.exitCode}): ${await setup.stderr()}`,
+    );
+  }
   const version = await sandbox.runCommand("codex", ["--version"]);
   const output = await version.stdout();
   console.log(JSON.stringify({ sandbox: sandbox.name, codex: output.trim() }));

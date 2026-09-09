@@ -37,11 +37,17 @@ export async function connectSandbox(sessionId: string, environmentId: string) {
       "/tmp/codex-setup.lock",
       "sh",
       "-c",
-      "mkdir -p /workspace && chown vercel-sandbox /workspace && (command -v codex || npm install -g @openai/codex@alpha)",
+      "mkdir -p /workspace && chown ubuntu:ubuntu /workspace && (command -v codex || npm install -g @openai/codex@alpha)",
     ],
     sudo: true,
   });
-  if (setup.exitCode !== 0) throw new Error("Codex executor setup failed");
+  if (setup.exitCode !== 0) {
+    const stderr = (await setup.stderr()).trim();
+    const stdout = (await setup.stdout()).trim();
+    throw new Error(
+      `Codex executor setup failed (${setup.exitCode}): ${stderr || stdout || "no command output"}`,
+    );
+  }
 
   const executor = await sandbox.runCommand({
     cmd: "flock",
