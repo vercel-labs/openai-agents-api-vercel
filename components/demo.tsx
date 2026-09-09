@@ -4,7 +4,6 @@ import {
   type FormEvent,
   type KeyboardEvent,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -15,7 +14,7 @@ import {
   type ParsedEvent,
 } from "@/lib/sse";
 
-type Session = { id: string; status?: string };
+type Session = { id: string };
 type Message = { id: string; role: "user" | "assistant"; content: string };
 
 async function errorMessage(response: Response) {
@@ -32,13 +31,6 @@ export function Demo() {
   const [running, setRunning] = useState(false);
   const conversationRef = useRef<HTMLDivElement>(null);
   const eventListRef = useRef<HTMLOListElement>(null);
-
-  const status = useMemo(() => {
-    if (error) return "error";
-    if (running) return "running";
-    if (session) return "connected";
-    return "not started";
-  }, [error, running, session]);
 
   useEffect(() => {
     conversationRef.current?.scrollTo({
@@ -212,10 +204,7 @@ export function Demo() {
 
       <aside className="session-rail" aria-label="Session details">
         <div className="rail-header">
-          <div>
-            <span className={`status ${status}`} role="status">{status}</span>
-            <h2>Session</h2>
-          </div>
+          <h2>Session</h2>
           {session ? (
             <button
               className="delete-button"

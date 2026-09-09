@@ -10,8 +10,6 @@
   --faint: #8f8f8f;
   --button: #1d1d1f;
   --button-text: #ffffff;
-  --success: #0a7a3e;
-  --warning: #a15c00;
   --danger: #c52828;
   --focus: #0070f3;
 }
@@ -28,8 +26,6 @@
     --faint: #6f6f6f;
     --button: #ededed;
     --button-text: #0a0a0a;
-    --success: #45b978;
-    --warning: #e49b45;
     --danger: #ff7070;
     --focus: #52a8ff;
   }
@@ -210,20 +206,7 @@ button, a, textarea, input { -webkit-tap-highlight-color: transparent; }
   background: var(--surface);
 }
 .rail-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-.rail-header h2 { margin: 7px 0 0; font-size: 18px; letter-spacing: -0.025em; }
-.status { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
-.status::before {
-  content: "";
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin-right: 7px;
-  border-radius: 50%;
-  background: var(--faint);
-}
-.status.running::before { background: var(--warning); box-shadow: 0 0 0 3px color-mix(in srgb, var(--warning) 15%, transparent); }
-.status.connected::before { background: var(--success); }
-.status.error::before { background: var(--danger); }
+.rail-header h2 { margin: 0; font-size: 18px; letter-spacing: -0.025em; }
 .delete-button {
   padding: 7px 9px;
   border: 1px solid var(--border);
