@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "app/api/queues/provision/route.ts": {
+      "experimentalTriggers": [
+        { "type": "queue/v2beta", "topic": "sandbox-wakeup" }
+      ]
+    }
+  }
+}
