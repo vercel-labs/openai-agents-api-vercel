@@ -48,7 +48,11 @@ a { color: inherit; }
 button, a, textarea, input { -webkit-tap-highlight-color: transparent; }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
 
-.page-shell { width: min(1080px, calc(100% - 48px)); margin: 0 auto; }
+.page-shell {
+  width: min(1080px, calc(100% - 48px));
+  margin: 0 auto;
+  padding-bottom: 52px;
+}
 .site-header {
   min-height: 64px;
   display: flex;
@@ -171,7 +175,6 @@ li {
   overflow-wrap: anywhere;
 }
 .muted { color: var(--faint); }
-footer { color: var(--faint); font-size: 13px; text-align: center; padding: 36px 0 52px; }
 
 .login-shell { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
 .login-card { width: min(420px, 100%); }

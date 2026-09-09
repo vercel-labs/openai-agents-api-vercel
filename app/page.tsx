@@ -29,10 +29,6 @@ export default async function Home() {
         </p>
       </section>
       <Demo />
-      <footer>
-        The application key stays in the control plane. Only a restricted
-        executor key enters the Sandbox.
-      </footer>
     </main>
   );
 }
