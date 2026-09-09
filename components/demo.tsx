@@ -207,7 +207,6 @@ export function Demo() {
               value={prompt}
             />
             <div className="composer-footer">
-              <span>{session ? "Same session and workspace" : "Starts a new session"}</span>
               <button
                 className={running ? "send-button loading" : "send-button"}
                 type="submit"

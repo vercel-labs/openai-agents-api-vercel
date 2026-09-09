@@ -175,11 +175,10 @@ button, a, textarea, input { -webkit-tap-highlight-color: transparent; }
   min-height: 42px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
   padding: 4px 10px 10px 16px;
 }
-.composer-footer > span { color: var(--faint); font-size: 11px; }
 .send-button {
   width: 28px;
   height: 28px;
