@@ -1,6 +1,10 @@
+import { redirect } from "next/navigation";
 import { Demo } from "@/components/demo";
+import { isAuthenticated } from "@/lib/auth";
 
-export default function Home() {
+export default async function Home() {
+  if (!(await isAuthenticated())) redirect("/login");
+
   return (
     <main>
       <nav>
@@ -11,6 +15,9 @@ export default function Home() {
         <a href="https://github.com/vercel-labs/openai-agents-api-vercel">
           GitHub ↗
         </a>
+        <form className="logout-form" action="/api/auth/logout" method="post">
+          <button type="submit">Sign out</button>
+        </form>
       </nav>
       <section className="hero">
         <p className="eyebrow">Managed agent, isolated execution</p>

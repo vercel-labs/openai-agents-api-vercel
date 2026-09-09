@@ -2,7 +2,7 @@
 
 Run an OpenAI-hosted Codex agent with a persistent, isolated [Vercel Sandbox](https://vercel.com/docs/sandbox) as its execution environment.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel-labs%2Fopenai-agents-api-vercel&env=OPENAI_API_KEY%2COPENAI_AGENT_ID%2COPENAI_EXECUTOR_API_KEY&envDescription=Credentials%20for%20the%20OpenAI%20Agents%20API%20demo.%20Add%20the%20webhook%20secret%20after%20the%20first%20deployment.&project-name=openai-agents-api-vercel&repository-name=openai-agents-api-vercel)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel-labs%2Fopenai-agents-api-vercel&env=OPENAI_API_KEY%2COPENAI_AGENT_ID%2COPENAI_EXECUTOR_API_KEY%2CAPP_PASSWORD&envDescription=Credentials%20and%20an%20application%20password%20for%20the%20OpenAI%20Agents%20API%20demo.%20Add%20the%20webhook%20secret%20after%20the%20first%20deployment.&project-name=openai-agents-api-vercel&repository-name=openai-agents-api-vercel)
 
 ## How it works
 
@@ -42,6 +42,7 @@ Click **Deploy with Vercel** above and configure these variables:
 | `OPENAI_API_KEY` | Creates and manages Agents API sessions. |
 | `OPENAI_AGENT_ID` | Limits the consumer to sessions for this agent. |
 | `OPENAI_EXECUTOR_API_KEY` | Connects `codex exec-server` to the session. Use the restricted key described above. |
+| `APP_PASSWORD` | Protects the demo UI and session APIs with a signed, HTTP-only cookie. |
 
 The webhook secret is created only after the deployment has a URL, so webhook setup is a second step:
 
@@ -51,6 +52,14 @@ The webhook secret is created only after the deployment has a URL, so webhook se
 4. Redeploy so the Function receives the new variable.
 
 The endpoint returns `503` until the real webhook secret replaces the default `pending-webhook-registration` value.
+If Deployment Protection is enabled, append the project's automation bypass
+secret to the webhook URL as
+`?x-vercel-protection-bypass=<bypass-secret>` so OpenAI can reach it.
+
+The password gate protects the UI and session APIs. It does not wrap the webhook,
+which verifies OpenAI's signature, or the Queue consumer, which Vercel invokes
+privately. For a production application, replace this shared password with your
+identity provider and authorization policy.
 
 ## Run locally
 
@@ -71,6 +80,10 @@ Local UI and Agents API routes work normally. Managed queue delivery invokes the
 - `POST /api/webhook` verifies OpenAI's signature and enqueues lifecycle work using the webhook event ID as its idempotency key.
 - `POST /api/queues/provision` is the private queue consumer that creates or reconnects the Sandbox.
 - `DELETE /api/sessions/:id` deletes both the OpenAI session and its Sandbox.
+
+The page and every `/api/sessions` Route Handler require a valid signed session
+cookie. `/api/auth/login` exchanges `APP_PASSWORD` for the cookie, and
+`/api/auth/logout` clears it.
 
 The project keeps a small `vercel.json` because Queue push consumers require a
 deploy-time `queue/v2beta` trigger. `handleCallback()` processes Queue delivery,
