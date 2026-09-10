@@ -8,13 +8,14 @@
     "build": "next build",
     "start": "next start",
     "test": "vitest run",
+    "create:agent": "tsx scripts/create-agent.ts",
     "probe:sandbox": "tsx scripts/probe-sandbox.ts"
   },
   "dependencies": {
     "@vercel/queue": "0.5.1",
     "@vercel/sandbox": "3.2.1",
     "next": "16.1.6",
-    "openai": "7.9.0",
+    "openai": "7.15.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "streamdown": "2.5.0"

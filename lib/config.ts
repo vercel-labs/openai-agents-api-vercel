@@ -19,6 +19,5 @@ export const config = {
   },
 };
 
-export const AGENTS_API_URL = "https://api.openai.com/v1/agents";
 export const SANDBOX_TIMEOUT_MS = 30 * 60_000;
 export const QUEUE_TOPIC = "sandbox-wakeup";

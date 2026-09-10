@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { isAuthenticated } from "@/lib/auth";
-import { openEventStream, sendInput } from "@/lib/openai";
-import { createSingleRunStream } from "@/lib/sse";
+import { runSession } from "@/lib/openai";
+import { createBrowserEventStream } from "@/lib/sse";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -17,11 +17,8 @@ export async function POST(request: Request, { params }: Context) {
 
   const { id } = await params;
   try {
-    // Subscribe before sending input so short runs cannot finish before the
-    // client starts listening for their events.
-    const upstream = await openEventStream(id);
-    await sendInput(id, input.trim(), randomUUID());
-    return new Response(createSingleRunStream(upstream.body!), {
+    const events = runSession(id, input.trim(), randomUUID());
+    return new Response(createBrowserEventStream(events), {
       headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache, no-transform",

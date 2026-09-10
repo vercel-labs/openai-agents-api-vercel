@@ -1,9 +1,10 @@
 import { QueueClient } from "@vercel/queue";
+import { NotFoundError } from "openai";
 import { connectSandbox, deleteSandbox } from "@/lib/sandbox";
 import {
   getSession,
   isSessionForThisDemo,
-  sandboxAction,
+  sandboxConnection,
 } from "@/lib/openai";
 
 const queue = new QueueClient({ region: "iad1" });
@@ -16,7 +17,7 @@ export const POST = queue.handleCallback<{ sessionId: string }>(
     try {
       session = await getSession(sessionId);
     } catch (error) {
-      if (error instanceof Error && error.message.includes("returned 404")) return;
+      if (error instanceof NotFoundError) return;
       throw error;
     }
 
@@ -26,9 +27,13 @@ export const POST = queue.handleCallback<{ sessionId: string }>(
       return;
     }
 
-    const action = sandboxAction(session);
-    if (!action?.environment_id) return;
-    const { sandbox } = await connectSandbox(sessionId, action.environment_id);
+    const connection = sandboxConnection(session);
+    if (!connection) return;
+    const { sandbox } = await connectSandbox(
+      sessionId,
+      connection.environmentId,
+      connection.remoteUrl,
+    );
     console.log(
       JSON.stringify({
         session_id: sessionId,

@@ -18,8 +18,8 @@ importers:
         specifier: 16.1.6
         version: 16.1.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       openai:
-        specifier: 7.9.0
-        version: 7.9.0(undici@7.29.0)(zod@4.5.4)
+        specifier: 7.15.0
+        version: 7.15.0(undici@7.29.0)(zod@4.5.4)
       react:
         specifier: 19.2.4
         version: 19.2.4
@@ -1580,8 +1580,8 @@ packages:
     resolution: {integrity: sha512-kbpaSSGJTWdAY5KPVeMOKXSrPtr8C8C7wodJbcsd51jRnmD+GZu8Y0VoU6Dm5Z4vWr0Ig/1NKuWRKf7j5aaYSg==}
     engines: {node: '>=6'}
 
-  openai@7.9.0:
-    resolution: {integrity: sha512-Qfx4qKmPllnilbuP6NgEj5KPUxLShYxrlRPWh3ZRQgNgs5B1V52PrfAdEQbW9MTGq7MquDYFMm+K/KXxiY736w==}
+  openai@7.15.0:
+    resolution: {integrity: sha512-2DIwesnPSduw68MFx7nAdgvshrgvS8WOan5W8+tgUMlAy/tY+Q41g80Pa+w/v64rHA6rtn+dketa8QvMVxU96w==}
     engines: {node: '>=22.0.0'}
     peerDependencies:
       '@aws-sdk/credential-provider-node': '>=3.972.0 <4'
@@ -3578,7 +3578,7 @@ snapshots:
     dependencies:
       mimic-fn: 2.1.0
 
-  openai@7.9.0(undici@7.29.0)(zod@4.5.4):
+  openai@7.15.0(undici@7.29.0)(zod@4.5.4):
     optionalDependencies:
       undici: 7.29.0
       zod: 4.5.4

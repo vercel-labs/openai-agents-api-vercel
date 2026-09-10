@@ -1,6 +1,6 @@
 # OpenAI Agents API on Vercel
 
-Build and deploy an OpenAI Agents API integration on Vercel. Vercel hosts the web experience and API routes, [Vercel Queues](https://vercel.com/docs/queues) coordinates lifecycle work, and [Vercel Sandbox](https://vercel.com/docs/sandbox) gives each agent session a persistent, isolated execution environment.
+Build and deploy an [OpenAI Agents API](https://developers.openai.com/api/docs/guides/agents-api/overview) integration on Vercel. Vercel hosts the web experience and API routes, [Vercel Queues](https://vercel.com/docs/queues) coordinates lifecycle work, and [Vercel Sandbox](https://vercel.com/docs/sandbox) gives each agent session a persistent, isolated execution environment.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel-labs%2Fopenai-agents-api-vercel&env=OPENAI_API_KEY%2COPENAI_AGENT_ID%2COPENAI_EXECUTOR_API_KEY%2CAPP_PASSWORD&envDescription=Credentials%20and%20an%20application%20password%20for%20the%20OpenAI%20Agents%20API%20demo.%20Add%20the%20webhook%20secret%20after%20the%20first%20deployment.&project-name=openai-agents-api-vercel&repository-name=openai-agents-api-vercel)
 
@@ -25,13 +25,21 @@ This is different from [building an agent with the OpenAI Agents SDK and Vercel 
 
 ## Prerequisites
 
-- Access to the OpenAI Agents API and a configured agent ID
+- An OpenAI project and a configured Agents API agent ID
 - A Vercel project with Functions, Queues, and Sandbox available
-- Two OpenAI API keys from the same organization, project, and user or service account:
-  - `OPENAI_API_KEY` for the application control plane
-  - `OPENAI_EXECUTOR_API_KEY` restricted to **List models → Read**, with every other permission set to **None**
+- Two OpenAI keys from the same organization, project, and user or service account:
+  - `OPENAI_API_KEY` for the application control plane, with `api.agents.read`, `api.agents.write`, and `api.responses.write`
+  - `OPENAI_EXECUTOR_API_KEY`, an environment key created from the **Agents** tab
 
-The restricted executor key is the only OpenAI credential passed into the Sandbox. Agent-generated code can read it, so keep the broader application key outside the Sandbox.
+The environment key is the only OpenAI credential passed into the Sandbox. Agent-generated code can read it, so keep the broader application key outside the Sandbox.
+
+After installing dependencies, create the reusable agent with the official OpenAI TypeScript SDK:
+
+```bash
+OPENAI_API_KEY=YOUR_APPLICATION_KEY pnpm create:agent
+```
+
+Save the returned `agent_...` value as `OPENAI_AGENT_ID`.
 
 ## Deploy
 
@@ -41,7 +49,7 @@ Click **Deploy with Vercel** above and configure these variables:
 | --- | --- |
 | `OPENAI_API_KEY` | Creates and manages Agents API sessions. |
 | `OPENAI_AGENT_ID` | Limits the consumer to sessions for this agent. |
-| `OPENAI_EXECUTOR_API_KEY` | Connects `codex exec-server` to the session. Use the restricted key described above. |
+| `OPENAI_EXECUTOR_API_KEY` | Connects `codex exec-server` to the session. Use the environment key described above. |
 | `APP_PASSWORD` | Protects the demo UI and session APIs with a signed, HTTP-only cookie. |
 
 The webhook secret is created only after the deployment has a URL, so webhook setup is a second step:
@@ -97,7 +105,7 @@ The Sandbox allows outbound access only to:
 
 - `api.openai.com` to register the executor
 - `codex-cloud-environments.chatgpt.com` for commands and results
-- `registry.npmjs.org` to install the alpha Codex CLI
+- `registry.npmjs.org` to install the Codex CLI
 
 For production, bake the Codex CLI and application dependencies into a custom image, then remove the npm registry from the allowlist. The sample uses the Vercel-managed Node 24 image and a 30-minute Sandbox timeout. Sandboxes are persistent so the same session can reconnect without losing its filesystem; deleting the session through the demo also deletes its Sandbox.
 
@@ -109,4 +117,15 @@ pnpm build
 pnpm probe:sandbox
 ```
 
-The probe creates a real Sandbox, installs the alpha Codex CLI, prints its version, and stops the Sandbox. A complete agent run additionally requires the OpenAI variables and registered webhook described above.
+The probe creates a real Sandbox, installs the Codex CLI, prints its version, and stops the Sandbox. A complete agent run additionally requires the OpenAI variables and registered webhook described above.
+
+## Resources
+
+- [Agents API documentation](https://developers.openai.com/api/docs/guides/agents-api/overview)
+- [Official OpenAI TypeScript SDK](https://github.com/openai/openai-node)
+- [OpenAI TypeScript SDK 7.15.0](https://www.npmjs.com/package/openai/v/7.15.0)
+- [Official OpenAI Python SDK](https://github.com/openai/openai-python)
+- [OpenAI Python SDK 3.13.0](https://pypi.org/project/openai/3.13.0/)
+- [OpenAI Cookbook sandbox examples](https://github.com/openai/openai-cookbook/tree/main/examples/agents_api/sandboxes/)
+- [OpenAI launch announcement](https://x.com/OpenAIDevs/status/2098130570048045453)
+- [Vercel implementation guide](https://vercel.com/kb/guide/openai-agents-api-vercel)

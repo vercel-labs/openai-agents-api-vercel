@@ -1,3 +1,5 @@
+import type { AgentSessionEvent } from "openai/resources/beta/agents/agents";
+
 export type ParsedEvent = {
   event: string;
   id?: string;
@@ -30,7 +32,7 @@ export function eventType(event: ParsedEvent) {
 }
 
 export function outputTextDelta(event: ParsedEvent) {
-  if (eventType(event) !== "session.turn.output_text.delta") return undefined;
+  if (eventType(event) !== "agent.session.turn.output_text.delta") return undefined;
   if (typeof event.data.delta === "string") return event.data.delta;
 
   const data = event.data.data;
@@ -43,7 +45,7 @@ export function outputTextDelta(event: ParsedEvent) {
 }
 
 export function outputTextPartKey(event: ParsedEvent) {
-  if (eventType(event) !== "session.turn.output_text.delta") return undefined;
+  if (eventType(event) !== "agent.session.turn.output_text.delta") return undefined;
 
   const nested = event.data.data;
   const data = nested && typeof nested === "object"
@@ -68,57 +70,30 @@ export function eventTurnId(event: ParsedEvent) {
   return undefined;
 }
 
-export function createSingleRunStream(source: ReadableStream<Uint8Array>) {
+type AgentEventStream = AsyncIterable<AgentSessionEvent> & {
+  abort(reason?: unknown): void;
+};
+
+export function createBrowserEventStream(source: AgentEventStream) {
   const encoder = new TextEncoder();
-  const decoder = new TextDecoder();
 
   return new ReadableStream<Uint8Array>({
     async start(controller) {
-      const reader = source.getReader();
-      let buffer = "";
-      let turnId: string | undefined;
-      let sawTurnEnd = false;
-      let complete = false;
-
-      const processBlock = (block: string) => {
-        controller.enqueue(encoder.encode(`${block}\n\n`));
-        const parsed = parseSseBlock(block);
-        if (!parsed) return;
-        const type = eventType(parsed);
-        const currentTurnId = eventTurnId(parsed);
-        if (!turnId && currentTurnId) turnId = currentTurnId;
-        if (
-          ["session.turn.completed", "session.turn.failed", "session.turn.cancelled"].includes(
-            type,
-          ) &&
-          turnId &&
-          currentTurnId === turnId
-        ) {
-          sawTurnEnd = true;
-        }
-        complete =
-          type === "session.failed" || (type === "session.idle" && sawTurnEnd);
-      };
-
       try {
-        while (!complete) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-          const blocks = buffer.split(/\r?\n\r?\n/);
-          buffer = blocks.pop() ?? "";
-          for (const block of blocks) {
-            if (block) processBlock(block);
-            if (complete) break;
-          }
+        for await (const event of source) {
+          controller.enqueue(
+            encoder.encode(
+              `id: ${event.event_id}\nevent: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`,
+            ),
+          );
         }
-        if (!complete && buffer.trim()) processBlock(buffer);
         controller.close();
       } catch (error) {
         controller.error(error);
-      } finally {
-        await reader.cancel().catch(() => undefined);
       }
+    },
+    cancel(reason) {
+      source.abort(reason);
     },
   });
 }

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createSession, sendInput } from "@/lib/openai";
+import { createSession } from "@/lib/openai";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -8,7 +8,7 @@ afterEach(() => {
 });
 
 describe("OpenAI Agents API client", () => {
-  it("uses the preview contract when creating a self-hosted session", async () => {
+  it("uses the official SDK to create a self-hosted session", async () => {
     vi.stubEnv("OPENAI_API_KEY", "test-app-key");
     vi.stubEnv("OPENAI_AGENT_ID", "agent_test");
 
@@ -21,41 +21,19 @@ describe("OpenAI Agents API client", () => {
     vi.stubGlobal("fetch", fetch);
 
     await expect(createSession()).resolves.toMatchObject({ id: "session_test" });
-    expect(fetch).toHaveBeenCalledWith(
-      "https://api.openai.com/v1/agents/sessions",
-      expect.objectContaining({
-        method: "POST",
-        headers: expect.objectContaining({
-          Authorization: "Bearer test-app-key",
-          "OpenAI-Beta": "agents=v1",
-        }),
-        body: JSON.stringify({
-          agent_id: "agent_test",
-          environment: {
-            type: "self_hosted",
-            workspace_directory: "/workspace",
-          },
-        }),
-      }),
+    expect(fetch).toHaveBeenCalledOnce();
+    const [url, init] = fetch.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("https://api.openai.com/v1/agents/sessions");
+    expect(init.method).toBe("POST");
+    expect(new Headers(init.headers).get("authorization")).toBe(
+      "Bearer test-app-key",
     );
-  });
-
-  it("accepts a successful input response with an empty body", async () => {
-    vi.stubEnv("OPENAI_API_KEY", "test-app-key");
-    const fetch = vi.fn().mockResolvedValue(new Response(null, { status: 202 }));
-    vi.stubGlobal("fetch", fetch);
-
-    await expect(
-      sendInput("session_test", "Run the tests", "input_test"),
-    ).resolves.toEqual({});
-    expect(fetch).toHaveBeenCalledWith(
-      "https://api.openai.com/v1/agents/sessions/session_test/events",
-      expect.objectContaining({
-        method: "POST",
-        headers: expect.objectContaining({
-          "Idempotency-Key": "input_test",
-        }),
-      }),
-    );
+    expect(JSON.parse(String(init.body))).toEqual({
+      agent_id: "agent_test",
+      environment: {
+        type: "self_hosted",
+        workspace_directory: "/workspace",
+      },
+    });
   });
 });

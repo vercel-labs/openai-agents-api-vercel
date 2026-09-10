@@ -13,7 +13,11 @@ export async function deleteSandbox(sessionId: string) {
   }
 }
 
-export async function connectSandbox(sessionId: string, environmentId: string) {
+export async function connectSandbox(
+  sessionId: string,
+  environmentId: string,
+  remoteUrl: string,
+) {
   const name = sandboxName(sessionId);
   const sandbox = await Sandbox.getOrCreate({
     name,
@@ -57,7 +61,7 @@ export async function connectSandbox(sessionId: string, environmentId: string) {
       "codex",
       "exec-server",
       "--remote",
-      "https://api.openai.com/v1/agents/api",
+      remoteUrl,
       "--environment-id",
       environmentId,
     ],
